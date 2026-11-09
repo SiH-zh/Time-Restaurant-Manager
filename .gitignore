@@ -1,0 +1,15 @@
+UserData/
+settings.json
+*.db
+*.db-wal
+*.db-shm
+*.bak
+*.log
+.env
+obj/
+bin/
+.vs/
+*.pdb
+*.tmp
+CareTests.dll
+test_loader.exe
