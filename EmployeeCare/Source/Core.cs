@@ -10,6 +10,7 @@ namespace EmployeeCare
         public bool CustomEnabled;
         public bool SyncFoodHire;
         public bool GuardFood;
+        public bool ChargeDishCost;
         public long DurationSeconds = 30L * 86400;
         public bool DisplayDays = true;
     }

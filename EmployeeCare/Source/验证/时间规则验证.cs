@@ -58,7 +58,8 @@ public static class CareTests
         }
         var system = new EmployeeItem { bIsSystemEmployee = true, eType = NpcType.Guard };
         Check((bool)patches.GetMethod("FeedingBlocked", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { system }), "模组未激活时保安保持原规则");
-        Console.WriteLine("全部通过：" + passed + "项。真实界面的补丁安装需在游戏运行时验证。");
+        Console.WriteLine("员工规则全部通过：" + passed + "项。真实界面的补丁安装需在游戏运行时验证。");
+        StockTests.Run();
     }
 
     // 只能在已初始化的游戏运行时调用；普通系统运行时不提供游戏引擎内部接口。

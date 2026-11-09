@@ -7,8 +7,8 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.UI;
 
-[assembly: System.Reflection.AssemblyTitle("时光餐厅雇员关怀")]
-[assembly: System.Reflection.AssemblyVersion("1.0.1.0")]
+[assembly: System.Reflection.AssemblyTitle("时光餐厅餐厅管家")]
+[assembly: System.Reflection.AssemblyVersion("1.1.1.0")]
 
 namespace EmployeeCare
 {
@@ -18,6 +18,7 @@ namespace EmployeeCare
         internal CareSettings Settings = new CareSettings();
         internal CareView View;
         internal string Status = "设置已就绪";
+        internal string StockStatus = "仅在点击补充按钮时执行，不会自动补充菜品。";
         private Harmony harmony;
         private GameObject entry;
         private MenuGroupUI menu;
@@ -29,13 +30,13 @@ namespace EmployeeCare
 
         protected override void OnAfterSetup()
         {
-            if (Current != null) throw new InvalidOperationException("雇员关怀已加载，更新后请重启游戏。");
+            if (Current != null) throw new InvalidOperationException("餐厅管家已加载，更新后请重启游戏。");
             Patches.CheckCompatibility();
             settingsPath = Path.Combine(Path.GetDirectoryName(GameWorld.GetCurrentSavePath()), "EmployeeCare", "settings.json");
             if (File.Exists(settingsPath))
             {
                 try { Settings = JsonConvert.DeserializeObject<CareSettings>(File.ReadAllText(settingsPath)) ?? new CareSettings(); }
-                catch (Exception ex) { Debug.LogWarning("[雇员关怀] 设置读取失败，使用默认关闭状态：" + ex.Message); }
+                catch (Exception ex) { Debug.LogWarning("[餐厅管家] 设置读取失败，使用默认关闭状态：" + ex.Message); }
             }
             DurationRules.Normalize(Settings);
             Current = this;
@@ -47,7 +48,7 @@ namespace EmployeeCare
                 View.Owner = this;
                 EventManager.Register("ENTER_MAIN_PANEL", Leave);
                 EventManager.Register("GUEST_MODE_CHANGE", Leave);
-                Debug.Log("[雇员关怀] 1.0.1加载成功；自定义时长=" + Settings.CustomEnabled + "，喂食续期=" + Settings.SyncFoodHire + "，保安喂食=" + Settings.GuardFood);
+                Debug.Log("[餐厅管家] 1.1.1加载成功；自定义时长=" + Settings.CustomEnabled + "，喂食续期=" + Settings.SyncFoodHire + "，保安喂食=" + Settings.GuardFood + "，菜品按成本收费=" + Settings.ChargeDishCost);
             }
             catch
             {
@@ -134,7 +135,7 @@ namespace EmployeeCare
             foreach (var e in employees) SetDuration(e, now);
             PersistEmployees();
             Status = "已将当前 " + EmployeeSummary() + " 的体力和雇期统一设为 " + DurationRules.Format(Settings.DurationSeconds, Settings.DisplayDays) + (Settings.DisplayDays ? " 天" : " 小时");
-            Debug.Log("[雇员关怀] " + Status + "；已保存修改前时间记录。");
+            Debug.Log("[餐厅管家] " + Status + "；已保存修改前时间记录。");
         }
 
         private void Update()
@@ -149,7 +150,7 @@ namespace EmployeeCare
                 }
                 if (View != null) View.Tick();
             }
-            catch (Exception ex) { Debug.LogError("[雇员关怀] 界面更新失败：" + ex); nextMount = Time.unscaledTime + 5; }
+            catch (Exception ex) { Debug.LogError("[餐厅管家] 界面更新失败：" + ex); nextMount = Time.unscaledTime + 5; }
         }
 
         private void MountEntry()
@@ -183,7 +184,7 @@ namespace EmployeeCare
             if (cursor != null) Destroy(cursor);
             LoadIcon();
             var tip = entry.GetComponent<TooltipTrigger>();
-            if (tip != null) tip.SetTextCallback(delegate(string a, string b) { return "雇员关怀\n工作时长 · 喂食续期 · 保安体力"; }, "", false);
+            if (tip != null) tip.SetTextCallback(delegate(string a, string b) { return "餐厅管家\n雇员工时 · 喂食续期 · 菜品补充"; }, "", false);
             LayoutRebuilder.MarkLayoutForRebuild(menu.transform as RectTransform);
         }
 
