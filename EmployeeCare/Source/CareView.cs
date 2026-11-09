@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -72,7 +72,13 @@ namespace EmployeeCare
             if (alertObject != null && alertObject.activeSelf) { alertObject.SetActive(false); return true; }
             Close(); return true;
         }
-        internal void Shutdown() { Close(); if (canvasObject != null) Destroy(canvasObject); }
+        internal void Shutdown()
+        {
+            Close();
+            if (canvasObject != null) Destroy(canvasObject);
+            // 材质仅归本模组所有；不改动也不销毁游戏共享字体材质。
+            if (material != null) { Destroy(material); material = null; }
+        }
         internal void Tick()
         {
             if (!visible) return;
@@ -83,9 +89,7 @@ namespace EmployeeCare
 
         private void Build()
         {
-            var sample = Resources.FindObjectsOfTypeAll<TMP_Text>().FirstOrDefault(t => t.font != null && t.gameObject.scene.IsValid());
-            font = sample == null ? TMP_Settings.defaultFontAsset : sample.font;
-            material = sample == null ? null : sample.fontSharedMaterial;
+            PrepareBodyFont();
             var sprites = Resources.FindObjectsOfTypeAll<Sprite>();
             confirmSprite = sprites.FirstOrDefault(s => s.name == "Btn_Confirm");
             cancelSprite = sprites.FirstOrDefault(s => s.name == "Btn_Cancel");
@@ -151,6 +155,47 @@ namespace EmployeeCare
             BuildStockPage();
             BuildAlert(root);
         }
+
+        private void PrepareBodyFont()
+        {
+            // 正文常用字体优先，按使用次数及名称排序，避免取决于第一个被枚举的标题。
+            var fonts = Resources.FindObjectsOfTypeAll<TMP_Text>()
+                .Where(t => t.font != null && t.gameObject.scene.IsValid()
+                    && (t.fontStyle & FontStyles.Bold) == 0)
+                .GroupBy(t => t.font)
+                .OrderByDescending(g => g.Key.HasCharacter('餐'))
+                .ThenByDescending(g => g.Count())
+                .ThenBy(g => g.Key.name, StringComparer.Ordinal)
+                .Select(g => g.Key);
+            font = fonts.FirstOrDefault() ?? TMP_Settings.defaultFontAsset;
+            if (font == null) throw new InvalidOperationException("正文中文字体尚未加载，请稍后重新打开餐厅管家。");
+            if (font.material == null) throw new InvalidOperationException("正文中文字体材质尚未加载，请稍后重新打开餐厅管家。");
+
+            // 只复制字体资产的基础材质，不继承任意游戏文字的标题／描边预设。
+            material = new Material(font.material);
+            material.name = "EmployeeCare_正文独立材质";
+            SetFontFloat("_FaceDilate", 0);
+            SetFontFloat("_OutlineWidth", 0);
+            SetFontFloat("_OutlineSoftness", 0);
+            SetFontFloat("_WeightNormal", 0);
+            SetFontFloat("_WeightBold", .3f);
+            SetFontFloat("_UnderlayDilate", 0);
+            SetFontFloat("_UnderlaySoftness", 0);
+            SetFontFloat("_UnderlayOffsetX", 0);
+            SetFontFloat("_UnderlayOffsetY", 0);
+            SetFontFloat("_GlowOuter", 0);
+            if (material.HasProperty("_FaceColor")) material.SetColor("_FaceColor", Color.white);
+            if (material.HasProperty("_OutlineColor")) material.SetColor("_OutlineColor", Color.clear);
+            if (material.HasProperty("_UnderlayColor")) material.SetColor("_UnderlayColor", Color.clear);
+            material.DisableKeyword("UNDERLAY_ON");
+            material.DisableKeyword("UNDERLAY_INNER");
+            material.DisableKeyword("GLOW_ON");
+            material.DisableKeyword("BEVEL_ON");
+            Debug.Log("[餐厅管家] 正文字体=" + font.name + "；使用独立材质，字面扩张与描边已归零。");
+        }
+
+        private void SetFontFloat(string property, float value)
+        { if (material.HasProperty(property)) material.SetFloat(property, value); }
 
         private void ShowPage(bool stock)
         {
@@ -283,7 +328,7 @@ namespace EmployeeCare
             image.sprite = enabled ? confirmSprite : cancelSprite;
             image.color = image.sprite != null ? Color.white : (enabled ? (Color)new Color32(133, 181, 68, 255) : (Color)new Color32(245, 204, 103, 255));
             var label = button.GetComponentInChildren<TMP_Text>(true);
-            label.fontStyle = enabled ? FontStyles.Bold : FontStyles.Normal;
+            label.fontStyle = FontStyles.Normal;
         }
 
         private bool CommitDuration()
@@ -339,6 +384,8 @@ namespace EmployeeCare
             var label = rect.gameObject.AddComponent<TextMeshProUGUI>();
             if (font != null) label.font = font;
             if (material != null) label.fontSharedMaterial = material;
+            label.fontStyle = FontStyles.Normal;
+            label.fontWeight = FontWeight.Regular;
             label.text = text; label.fontSize = size; label.color = ink;
             label.alignment = TextAlignmentOptions.MidlineLeft; label.enableWordWrapping = true;
             label.raycastTarget = false; label.richText = false; label.overflowMode = TextOverflowModes.Truncate;

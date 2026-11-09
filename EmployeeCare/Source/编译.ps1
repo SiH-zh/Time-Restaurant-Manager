@@ -12,4 +12,4 @@ foreach ($ref in $refs) { $arguments += '/reference:' + (Join-Path $managed $ref
 $arguments += @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.cs' | ForEach-Object FullName)
 & $compiler $arguments
 if ($LASTEXITCODE -ne 0) { throw '编译失败。' }
-Write-Output '雇员关怀编译完成。'
+Write-Output '餐厅管家编译完成。'

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,7 +23,7 @@ namespace EmployeeCare
                 || AccessTools.Method(typeof(EmployeeItem), "GetMaxStaminaSeconds") == null
                 || AccessTools.Method(typeof(EmployeeData), "AddSystemEmployee") == null
                 || AccessTools.Method(typeof(EmployeeData), "AddFriendEmployee") == null)
-                throw new InvalidOperationException("当前游戏版本的雇员接口不兼容，请更新雇员关怀。");
+                throw new InvalidOperationException("当前游戏版本的雇员接口不兼容，请更新餐厅管家。");
         }
 
         internal static bool FeedingBlocked(EmployeeItem employee)
@@ -217,7 +217,7 @@ namespace EmployeeCare
             Restaurant.SaveImmediate();
             // 原版先刷新文字再返回；续期后补刷一次，让雇期立即显示新值。
             AccessTools.Method(typeof(EmployeeRoomPanel), "UpdateHireTimeDisplay").Invoke(__instance, null);
-            Debug.Log("[雇员关怀] 喂食成功，同步延长雇期 " + restored + " 秒。");
+            Debug.Log("[餐厅管家] 喂食成功，同步延长雇期 " + restored + " 秒。");
         }
     }
 }

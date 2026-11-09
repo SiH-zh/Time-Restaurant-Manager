@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [assembly: System.Reflection.AssemblyTitle("时光餐厅餐厅管家")]
-[assembly: System.Reflection.AssemblyVersion("1.1.1.0")]
+[assembly: System.Reflection.AssemblyVersion("1.1.2.0")]
 
 namespace EmployeeCare
 {
@@ -48,7 +48,7 @@ namespace EmployeeCare
                 View.Owner = this;
                 EventManager.Register("ENTER_MAIN_PANEL", Leave);
                 EventManager.Register("GUEST_MODE_CHANGE", Leave);
-                Debug.Log("[餐厅管家] 1.1.1加载成功；自定义时长=" + Settings.CustomEnabled + "，喂食续期=" + Settings.SyncFoodHire + "，保安喂食=" + Settings.GuardFood + "，菜品按成本收费=" + Settings.ChargeDishCost);
+                Debug.Log("[餐厅管家] 1.1.2加载成功；自定义时长=" + Settings.CustomEnabled + "，喂食续期=" + Settings.SyncFoodHire + "，保安喂食=" + Settings.GuardFood + "，菜品按成本收费=" + Settings.ChargeDishCost);
             }
             catch
             {

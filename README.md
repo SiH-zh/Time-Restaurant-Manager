@@ -6,7 +6,7 @@
 
 《时光餐厅》的非官方功能模组，将雇员工作时长、喂食续期、保安体力补充和在售菜品补充放在同一个设置面板，方便提前安排员工工作与营业库存。
 
-**当前版本：1.1.1** · [Steam创意工坊订阅（推荐）](https://steamcommunity.com/sharedfiles/filedetails/?id=3836622282) · [GitHub手动下载（备选）](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.1) · [历史版本](https://github.com/SiH-zh/Time-Restaurant-Manager/releases) · [游戏Steam商店](https://store.steampowered.com/app/4399360/?l=schinese) · [MIT许可证中文对照](LICENSE.zh-CN.md)
+**当前版本：1.1.2** · [Steam创意工坊订阅（推荐）](https://steamcommunity.com/sharedfiles/filedetails/?id=3836622282) · [GitHub手动下载（备选）](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.2) · [历史版本](https://github.com/SiH-zh/Time-Restaurant-Manager/releases) · [游戏Steam商店](https://store.steampowered.com/app/4399360/?l=schinese) · [MIT许可证中文对照](LICENSE.zh-CN.md)
 
 日常使用优先订阅工坊版；GitHub提供源码、完整版本记录和备选手动安装包。旧版本使用“雇员关怀”名称，当前统一显示“餐厅管家”，内部目录仍为 `EmployeeCare`，升级保留原设置。
 
@@ -76,18 +76,19 @@
 
 只处理自己餐厅实际雇用的厨师、服务员和保安，永久超级员工除外。做客、装修、扩建预览与存档冻结期间不补货。工时通过目标到期时间反算原雇佣开始时间实现，长时长下底层开始日期可能位于未来，剩余时间正常倒计时。
 
-已验证目标为Windows版时光餐厅2.0.0，本机游戏构建编号 `26431062`。游戏更新或其他模组修改相同逻辑时可能需要适配，不承诺兼容所有组合。81项规则检查和实机范围见[版本详情](docs/versions/v1.1.1.md)。新增置顶余额提示的完整触发交互尚未重新实机验证。
+已验证目标为Windows版时光餐厅2.0.0，本机游戏构建编号 `26431062`。游戏更新或其他模组修改相同逻辑时可能需要适配，不承诺兼容所有组合。既有81项业务规则检查见[1.1.1版本详情](docs/versions/v1.1.1.md)。1.1.2已确认从工坊加载，雇员管理与菜品补充两页字体正常，详见[字体修复与验证](docs/versions/v1.1.2.md)。新增置顶余额提示的完整触发交互尚未重新实机验证。
 
 ## 版本记录
 
 | 版本 | 主要变化 |
 | --- | --- |
+| [1.1.2](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.2) | 修复界面异常粗黑字体，已完成工坊加载和两页实机显示检查 |
 | [1.1.1](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.1) | 餐厅管家：菜品补充、费用检查与界面状态优化 |
 | [1.0.2](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.0.2) | 全新安装功能开关默认关闭 |
 | [1.0.1](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.0.1) | 保安能力说明保留与员工、保安分别计数 |
 | [1.0.0](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.0.0) | 首次归档：雇员工时、喂食续期与保安补充体力 |
 
-每个版本均提供对应标签、源码快照、安装包、SHA-256校验文件及详细说明。1.0对应规范化标签 `v1.0.0`。所有版本由留存完整交付包整理，提交历史是本次按版本建立的归档快照，不是原始开发过程的提交记录。
+每个版本均提供对应标签、源码快照、安装包、SHA-256校验文件及详细说明。1.0对应规范化标签 `v1.0.0`。1.0.0至1.1.1由留存完整交付包整理，对应提交为归档快照；1.1.2起继续记录后续修复。历史归档提交不代表原始开发过程的提交时间线。
 
 详见[更新记录](CHANGELOG.md)及[各版本详情](docs/versions)。
 
