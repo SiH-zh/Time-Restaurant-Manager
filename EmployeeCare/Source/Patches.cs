@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
+using TMPro;
 
 namespace EmployeeCare
 {
@@ -106,11 +107,60 @@ namespace EmployeeCare
     {
         private static void Postfix(EmployeeRoomPanel __instance, EmployeeItem __0)
         {
+            var tips = AccessTools.Field(typeof(EmployeeRoomPanel), "m_ObjSysWorkerTxt").GetValue(__instance) as GameObject;
+            if (tips == null) return;
+            var layout = __instance.GetComponent<GuardDescriptionLayout>();
+            if (layout != null) layout.Restore();
             var mod = ModBehaviour.Current;
             if (mod == null || !mod.Settings.GuardFood || __0 == null
                 || __0.eType != NpcType.Guard || !mod.Owns(__0)) return;
-            var tips = AccessTools.Field(typeof(EmployeeRoomPanel), "m_ObjSysWorkerTxt").GetValue(__instance) as GameObject;
-            if (tips != null) tips.SetActive(false);
+            if (layout == null)
+            {
+                layout = __instance.gameObject.AddComponent<GuardDescriptionLayout>();
+                layout.Initialize(tips);
+            }
+            layout.ShowAboveFood();
+        }
+    }
+
+    // 原说明完整保留，移至姓名与体力条之间；关闭功能或停用模组时还原布局。
+    internal sealed class GuardDescriptionLayout : MonoBehaviour
+    {
+        private RectTransform group;
+        private Vector2 position;
+        private TMP_Text[] labels;
+        private Vector2[] sizes;
+        private bool[] wrapping;
+
+        internal void Initialize(GameObject tips)
+        {
+            group = tips.GetComponent<RectTransform>();
+            position = group.anchoredPosition;
+            labels = tips.GetComponentsInChildren<TMP_Text>(true);
+            sizes = labels.Select(t => t.rectTransform.sizeDelta).ToArray();
+            wrapping = labels.Select(t => t.enableWordWrapping).ToArray();
+        }
+
+        internal void ShowAboveFood()
+        {
+            group.anchoredPosition = position + new Vector2(0, 470);
+            for (int i = 0; i < labels.Length; i++)
+            {
+                labels[i].rectTransform.sizeDelta = new Vector2(sizes[i].x, Mathf.Max(sizes[i].y, 100));
+                labels[i].enableWordWrapping = true;
+            }
+        }
+
+        internal void Restore()
+        {
+            if (group == null || labels == null) return;
+            group.anchoredPosition = position;
+            for (int i = 0; i < labels.Length; i++)
+                if (labels[i] != null)
+                {
+                    labels[i].rectTransform.sizeDelta = sizes[i];
+                    labels[i].enableWordWrapping = wrapping[i];
+                }
         }
     }
 

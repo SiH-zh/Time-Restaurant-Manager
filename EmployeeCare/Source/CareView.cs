@@ -30,7 +30,7 @@ namespace EmployeeCare
         private bool registered;
         private string pendingContext;
         private long pendingDuration;
-        private int pendingCount;
+        private string pendingRoster;
 
         internal void Open()
         {
@@ -137,11 +137,11 @@ namespace EmployeeCare
             if (!Owner.Ready() || !Owner.Settings.CustomEnabled || !CommitDuration()) return;
             Owner.SaveSettings();
             string context = GameWorld.GetCurrentSavePath() + "|" + Player.m_szPlayerId;
-            int count = Owner.EmployeeCount();
-            if (pendingContext != context || pendingDuration != Owner.Settings.DurationSeconds || pendingCount != count)
+            string roster = Owner.EmployeeSummary();
+            if (pendingContext != context || pendingDuration != Owner.Settings.DurationSeconds || pendingRoster != roster)
             {
-                pendingContext = context; pendingDuration = Owner.Settings.DurationSeconds; pendingCount = count;
-                applyLabel.text = "再次点击：确认重设当前 " + count + " 人";
+                pendingContext = context; pendingDuration = Owner.Settings.DurationSeconds; pendingRoster = roster;
+                applyLabel.text = "再次点击：确认重设当前 " + roster;
                 hint.text = "将体力和剩余雇期都重设为指定时长，可能缩短现有时间。执行前自动备份原时间。";
                 return;
             }
@@ -150,7 +150,7 @@ namespace EmployeeCare
             CancelPending(); Refresh(); Patches.RefreshOpenPanels();
         }
 
-        private void CancelPending() { pendingContext = null; pendingDuration = 0; pendingCount = 0; }
+        private void CancelPending() { pendingContext = null; pendingDuration = 0; pendingRoster = null; }
         private void Refresh()
         {
             if (canvasObject == null) return;
@@ -159,7 +159,7 @@ namespace EmployeeCare
             foodLabel.text = Owner.Settings.SyncFoodHire ? "已开启" : "已关闭";
             guardLabel.text = Owner.Settings.GuardFood ? "已开启" : "已关闭";
             unit.text = Owner.Settings.DisplayDays ? "天（切换）" : "小时（切换）";
-            applyLabel.text = "将当前 " + Owner.EmployeeCount() + " 人的体力与雇期设为 "
+            applyLabel.text = "将当前 " + Owner.EmployeeSummary() + " 的体力与雇期设为 "
                 + DurationRules.Format(Owner.Settings.DurationSeconds, Owner.Settings.DisplayDays) + (Owner.Settings.DisplayDays ? " 天" : " 小时");
             applyButton.interactable = Owner.Settings.CustomEnabled;
             hint.text = "保存时长和切换开关均不会自动重置已有员工；本次只影响你自己的餐厅。";

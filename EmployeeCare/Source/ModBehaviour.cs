@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [assembly: System.Reflection.AssemblyTitle("时光餐厅雇员关怀")]
-[assembly: System.Reflection.AssemblyVersion("1.0.0.0")]
+[assembly: System.Reflection.AssemblyVersion("1.0.1.0")]
 
 namespace EmployeeCare
 {
@@ -47,7 +47,7 @@ namespace EmployeeCare
                 View.Owner = this;
                 EventManager.Register("ENTER_MAIN_PANEL", Leave);
                 EventManager.Register("GUEST_MODE_CHANGE", Leave);
-                Debug.Log("[雇员关怀] 1.0.0加载成功；自定义时长=" + Settings.CustomEnabled + "，喂食续期=" + Settings.SyncFoodHire + "，保安喂食=" + Settings.GuardFood);
+                Debug.Log("[雇员关怀] 1.0.1加载成功；自定义时长=" + Settings.CustomEnabled + "，喂食续期=" + Settings.SyncFoodHire + "，保安喂食=" + Settings.GuardFood);
             }
             catch
             {
@@ -112,6 +112,13 @@ namespace EmployeeCare
             return Ready() ? Restaurant.GetEmployeeList().Count(Owns) : 0;
         }
 
+        internal string EmployeeSummary()
+        {
+            var employees = Ready() ? Restaurant.GetEmployeeList().Where(Owns).ToList() : new List<EmployeeItem>();
+            int guards = employees.Count(e => e.eType == NpcType.Guard);
+            return (employees.Count - guards) + "人+" + guards + "保安";
+        }
+
         internal void ApplyExisting()
         {
             if (!Settings.CustomEnabled || !Ready()) return;
@@ -126,7 +133,7 @@ namespace EmployeeCare
             File.WriteAllText(backup, JsonConvert.SerializeObject(new { 存档 = GameWorld.GetCurrentSavePath(), 时间 = now, 原记录 = snapshots }, Formatting.Indented));
             foreach (var e in employees) SetDuration(e, now);
             PersistEmployees();
-            Status = "已将当前 " + employees.Count + " 人的体力和雇期统一设为 " + DurationRules.Format(Settings.DurationSeconds, Settings.DisplayDays) + (Settings.DisplayDays ? " 天" : " 小时");
+            Status = "已将当前 " + EmployeeSummary() + " 的体力和雇期统一设为 " + DurationRules.Format(Settings.DurationSeconds, Settings.DisplayDays) + (Settings.DisplayDays ? " 天" : " 小时");
             Debug.Log("[雇员关怀] " + Status + "；已保存修改前时间记录。");
         }
 
@@ -203,6 +210,8 @@ namespace EmployeeCare
             if (stopped) return;
             stopped = true;
             if (harmony != null) harmony.UnpatchAll(harmony.Id);
+            foreach (var layout in Resources.FindObjectsOfTypeAll<GuardDescriptionLayout>())
+                layout.Restore();
             Patches.RefreshOpenPanels();
             EventManager.Unregister("ENTER_MAIN_PANEL", Leave);
             EventManager.Unregister("GUEST_MODE_CHANGE", Leave);
