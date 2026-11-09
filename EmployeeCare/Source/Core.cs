@@ -9,7 +9,7 @@ namespace EmployeeCare
         public int Version = 1;
         public bool CustomEnabled;
         public bool SyncFoodHire;
-        public bool GuardFood = true;
+        public bool GuardFood;
         public long DurationSeconds = 30L * 86400;
         public bool DisplayDays = true;
     }
