@@ -52,6 +52,12 @@ public static class StockTests
         Reject(delegate { StockRules.Plan(new StockLine[0], 10, false); }, "无在售菜时拒绝");
         Reject(delegate { StockRules.Plan(new[] { lines[0], lines[0] }, 10, false); }, "重复槽位拒绝");
         Check(StockRules.Plan(new[] { new StockLine { Slot=0, Id="same", Cost=1 }, new StockLine { Slot=1, Id="same", Cost=1 } }, 10, true).Cost == 20, "同菜不同槽位分别计费");
+        var expanded = Enumerable.Range(0, 18).Select(i => new StockLine { Slot = i, Cost = i + 1 }).ToArray();
+        Check(StockRules.Plan(expanded, 10, true, 18).Cost == 1710, "18槽全部在售时正确累计成本");
+        Check(StockRules.Plan(new[] { expanded[17] }, 10, false, 18).Cost == 0, "扩展末槽可单独免费补货");
+        Reject(delegate { StockRules.Plan(new[] { expanded[17] }, 10, false, 9); }, "原版菜单拒绝扩展槽下标");
+        Reject(delegate { StockRules.Plan(new[] { new StockLine { Slot=18 } }, 10, false, 18); }, "扩展菜单拒绝越界下标");
+        Reject(delegate { StockRules.Plan(expanded, 10, false, 12); }, "拒绝未知的12槽布局");
         var defaults = new CareSettings();
         Check(!defaults.CustomEnabled && !defaults.SyncFoodHire && !defaults.GuardFood && !defaults.ChargeDishCost, "初装全部开关关闭");
         var migrated = JsonConvert.DeserializeObject<CareSettings>("{\"CustomEnabled\":true,\"GuardFood\":true,\"SyncFoodHire\":true,\"DurationSeconds\":43200}");

@@ -6,7 +6,7 @@
 
 《时光餐厅》的非官方功能模组，将雇员工作时长、喂食续期、保安体力补充和在售菜品补充放在同一个设置面板，方便提前安排员工工作与营业库存。
 
-**当前版本：1.1.2** · [Steam创意工坊订阅（推荐）](https://steamcommunity.com/sharedfiles/filedetails/?id=3836622282) · [GitHub手动下载（备选）](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.2) · [历史版本](https://github.com/SiH-zh/Time-Restaurant-Manager/releases) · [游戏Steam商店](https://store.steampowered.com/app/4399360/?l=schinese) · [MIT许可证中文对照](LICENSE.zh-CN.md)
+**当前版本：1.1.4** · [Steam创意工坊订阅（推荐）](https://steamcommunity.com/sharedfiles/filedetails/?id=3836622282) · [GitHub手动下载（备选）](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.4) · [历史版本](https://github.com/SiH-zh/Time-Restaurant-Manager/releases) · [游戏Steam商店](https://store.steampowered.com/app/4399360/?l=schinese) · [MIT许可证中文对照](LICENSE.zh-CN.md)
 
 日常使用优先订阅工坊版；GitHub提供源码、完整版本记录和备选手动安装包。旧版本使用“雇员关怀”名称，当前统一显示“餐厅管家”，内部目录仍为 `EmployeeCare`，升级保留原设置。
 
@@ -62,6 +62,8 @@
 
 补充只作用于当前已上架、已解锁的菜槽，包括已上架但售罄的菜。空槽不自动上菜。
 
+原版 9 槽可直接补货。同时启用「百味食光」2.0.1 时，也支持给扩展后的 18 槽补货。停用扩展后若存档仍留有 18 槽，完整重启游戏后可在「菜品补充」页预览并确认「恢复原版9槽」。扩展菜品优先移入同类已解锁的空槽，放不下的会在确认前提示，确认后移出售卖菜单并写入清单。详见[1.1.4 版本说明](docs/versions/v1.1.4.md)。
+
 例如3道主菜、3道配餐、1道精品菜，点击“+1000”会**每道各加1000份，合计7000份**。每次每道最多增加10万份，每道补充后库存最多100万份。拒绝小数、负数、科学计数法、分隔符、空格和超大数字；任意一道超过安全值则整次取消。
 
 收费关闭时免费补充；开启后费用为“各参与菜槽的单份金币成本之和 × 每道增加份数”，使用游戏成本资料，不按售价扣钱。点击时再次核对余额，**不足时不扣金币、不补充任何菜品**。金额乘法和求和包含溢出检查。
@@ -76,12 +78,13 @@
 
 只处理自己餐厅实际雇用的厨师、服务员和保安，永久超级员工除外。做客、装修、扩建预览与存档冻结期间不补货。工时通过目标到期时间反算原雇佣开始时间实现，长时长下底层开始日期可能位于未来，剩余时间正常倒计时。
 
-已验证目标为Windows版时光餐厅2.0.0，本机游戏构建编号 `26431062`。游戏更新或其他模组修改相同逻辑时可能需要适配，不承诺兼容所有组合。既有81项业务规则检查见[1.1.1版本详情](docs/versions/v1.1.1.md)。1.1.2已确认从工坊加载，雇员管理与菜品补充两页字体正常，详见[字体修复与验证](docs/versions/v1.1.2.md)。新增置顶余额提示的完整触发交互尚未重新实机验证。
+1.1.4 使用 Windows 版《时光餐厅》构建 `26872895` 的程序集编译，已通过规则检查及菜槽兼容流程验证。游戏更新或其他模组修改相同逻辑时可能需要适配。详见[验证报告](EmployeeCare/验证报告.md)。
 
 ## 版本记录
 
 | 版本 | 主要变化 |
 | --- | --- |
+| [1.1.4](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.4) | 兼容原版 9 槽与扩展 18 槽，支持停用扩展后恢复原版菜槽 |
 | [1.1.2](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.2) | 修复界面异常粗黑字体，已完成工坊加载和两页实机显示检查 |
 | [1.1.1](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.1.1) | 餐厅管家：菜品补充、费用检查与界面状态优化 |
 | [1.0.2](https://github.com/SiH-zh/Time-Restaurant-Manager/releases/tag/v1.0.2) | 全新安装功能开关默认关闭 |

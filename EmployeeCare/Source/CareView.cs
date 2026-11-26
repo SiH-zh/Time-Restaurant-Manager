@@ -20,9 +20,13 @@ namespace EmployeeCare
         private Button employeeTab, stockTab;
         private GameObject alertObject;
         private TMP_Text alertTitle, alertBody;
+        private Button alertDismiss, alertConfirm;
+        private Action alertAction;
         private Image stockNotice;
         private bool stockError;
         private Button stockApply;
+        private readonly Button[] stockShortcuts = new Button[4];
+        private Button recoverMenu;
         private readonly StockInputState stockEntry = new StockInputState();
         private bool invalidStockInput;
         private float nextStockRefresh;
@@ -60,7 +64,7 @@ namespace EmployeeCare
         internal void Close()
         {
             visible = false;
-            if (alertObject != null) alertObject.SetActive(false);
+            DismissAlert();
             if (canvasObject != null) canvasObject.SetActive(false);
             if (registered) { UIManager.UnregisterEscHandler(this); registered = false; }
             CancelPending();
@@ -69,7 +73,7 @@ namespace EmployeeCare
         public bool OnEscapePressed()
         {
             if (!visible) return false;
-            if (alertObject != null && alertObject.activeSelf) { alertObject.SetActive(false); return true; }
+            if (alertObject != null && alertObject.activeSelf) { DismissAlert(); return true; }
             Close(); return true;
         }
         internal void Shutdown()
@@ -218,7 +222,7 @@ namespace EmployeeCare
             for (int i = 0; i < amounts.Length; i++)
             {
                 int amount = amounts[i];
-                Button(stockPage, "+" + amount, 40 + i * 214, 133, 198, 58, true, delegate {
+                stockShortcuts[i] = Button(stockPage, "+" + amount, 40 + i * 214, 133, 198, 58, true, delegate {
                     stockEntry.SetShortcut(amount); stockInput.SetTextWithoutNotify(stockEntry.Text);
                     invalidStockInput = false; AddStock(amount);
                 });
@@ -253,6 +257,8 @@ namespace EmployeeCare
             }).GetComponentInChildren<TMP_Text>();
             Label(stockPage, "开启：按原版单份成本累计扣费，余额不足则整次取消。关闭：免费补充。", 40, 397, 840, 58, 20);
             stockPreview = Label(stockPage, "", 40, 459, 840, 100, 21);
+            recoverMenu = Button(stockPage, "恢复原版9槽", 40, 508, 280, 48, true, ConfirmMenuRecovery);
+            recoverMenu.gameObject.SetActive(false);
             var notice = Rect("补充结果提示", stockPage); Place(notice, 34, 558, 852, 62);
             stockNotice = notice.gameObject.AddComponent<Image>(); stockNotice.raycastTarget = false;
             stockStatus = Label(notice, "", 10, 3, 832, 56, 21);
@@ -265,10 +271,21 @@ namespace EmployeeCare
             SetButtonState(chargeLabel.GetComponentInParent<Button>(true), Owner.Settings.ChargeDishCost);
             int amount;
             bool valid = !invalidStockInput && StockRules.TryAmount(stockInput.text, out amount);
-            stockApply.interactable = valid;
+            bool recoveryAvailable = MenuRecovery.IsAvailable();
+            recoverMenu.gameObject.SetActive(recoveryAvailable);
+            stockApply.interactable = valid && !recoveryAvailable;
+            foreach (var shortcut in stockShortcuts) shortcut.interactable = !recoveryAvailable;
             stockStatus.text = Owner.StockStatus;
             stockStatus.color = stockError ? (Color)new Color32(157, 35, 35, 255) : ink;
             stockNotice.color = stockError ? (Color)new Color32(255, 219, 210, 255) : new Color(0, 0, 0, 0);
+            if (recoveryAvailable)
+            {
+                stockPreview.text = "存档仍有18槽。无需重新启用扩展，可恢复原版9槽后继续补货。";
+                stockPreview.color = ink; stockPreview.fontStyle = FontStyles.Normal;
+                Place(stockPreview.rectTransform, 40, 456, 840, 48);
+                return;
+            }
+            Place(stockPreview.rectTransform, 40, 459, 840, 100);
             if (!valid) { stockPreview.text = "请输入有效份数后查看总费用；快捷按钮按其标注份数直接补充。"; return; }
             StockRules.TryAmount(stockInput.text, out amount);
             try
@@ -279,6 +296,26 @@ namespace EmployeeCare
                 stockPreview.fontStyle = insufficient ? FontStyles.Bold : FontStyles.Normal;
             }
             catch (Exception ex) { stockPreview.text = ex.Message; stockPreview.color = ink; stockPreview.fontStyle = FontStyles.Normal; }
+        }
+
+        private void ConfirmMenuRecovery()
+        {
+            try
+            {
+                var plan = MenuRecovery.Preview(Owner);
+                ShowAlert("恢复原版9槽", MenuRecovery.Describe(plan), delegate {
+                    try { Owner.StockStatus = MenuRecovery.Apply(Owner, plan); stockError = false; }
+                    catch (Exception ex)
+                    {
+                        Owner.StockStatus = "恢复未完成。";
+                        stockError = true;
+                        ShowAlert("恢复未完成", ex.Message);
+                        Debug.LogWarning("[餐厅管家] 恢复原版菜槽失败：" + ex);
+                    }
+                    RefreshStock();
+                });
+            }
+            catch (Exception ex) { ShowAlert("暂时无法恢复菜槽", ex.Message); }
         }
 
         private void AddStock(int amount)
@@ -312,12 +349,27 @@ namespace EmployeeCare
             border.gameObject.AddComponent<Image>().color = new Color32(183, 48, 37, 255);
             alertTitle = Label(box, "", 34, 30, 652, 58, 35); alertTitle.color = new Color32(177, 37, 31, 255); alertTitle.fontStyle = FontStyles.Bold;
             alertBody = Label(box, "", 36, 99, 648, 240, 25);
-            Button(box, "知道了", 212, 365, 296, 56, false, delegate { alertObject.SetActive(false); });
+            alertDismiss = Button(box, "知道了", 212, 365, 296, 56, false, DismissAlert);
+            alertConfirm = Button(box, "确认恢复", 384, 365, 270, 56, true, delegate {
+                var action = alertAction;
+                DismissAlert();
+                if (action != null) action();
+            });
             alertObject.SetActive(false);
         }
 
-        private void ShowAlert(string title, string body)
+        private void DismissAlert()
         {
+            alertAction = null;
+            if (alertObject != null) alertObject.SetActive(false);
+        }
+
+        private void ShowAlert(string title, string body, Action confirm = null)
+        {
+            alertAction = confirm;
+            alertConfirm.gameObject.SetActive(confirm != null);
+            alertDismiss.GetComponentInChildren<TMP_Text>().text = confirm == null ? "知道了" : "取消";
+            Place((RectTransform)alertDismiss.transform, confirm == null ? 212 : 66, 365, confirm == null ? 296 : 270, 56);
             alertTitle.text = title; alertBody.text = body;
             alertObject.transform.SetAsLastSibling(); alertObject.SetActive(true);
         }

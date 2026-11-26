@@ -47,6 +47,8 @@ namespace EmployeeCare
     {
         public const int MaxAddition = 100000;
         public const int MaxStock = 1000000;
+        internal const int OriginalSlotCount = 9;
+        internal const int ExpandedSlotCount = 18;
 
         public static bool DigitsOnly(string text)
         {
@@ -65,14 +67,20 @@ namespace EmployeeCare
 
         public static StockPlan Plan(StockLine[] lines, int amount, bool charge)
         {
+            return Plan(lines, amount, charge, OriginalSlotCount);
+        }
+
+        public static StockPlan Plan(StockLine[] lines, int amount, bool charge, int slotCount)
+        {
             if (amount < 1 || amount > MaxAddition) throw new InvalidOperationException("每道增加份数须为1至100000的整数。");
             if (lines == null || lines.Length == 0) throw new InvalidOperationException("当前没有已上架的菜品，请先上架菜品。");
-            if (lines.Length > 9) throw new InvalidOperationException("菜槽结构与本版不兼容，未进行补充。");
+            if (slotCount != OriginalSlotCount && slotCount != ExpandedSlotCount)
+                throw new InvalidOperationException("无法识别当前菜槽结构，未进行补充。");
             long total = 0;
             var slots = new HashSet<int>();
             foreach (var line in lines)
             {
-                if (line == null || line.Slot < 0 || line.Slot >= 9 || !slots.Add(line.Slot))
+                if (line == null || line.Slot < 0 || line.Slot >= slotCount || !slots.Add(line.Slot))
                     throw new InvalidOperationException("菜槽数据异常，未进行补充。");
                 if (line.Count < 0 || (long)line.Count + amount > MaxStock)
                     throw new InvalidOperationException((line.Name ?? "菜品") + "补充后会超过100万份，整次补充已取消。");
